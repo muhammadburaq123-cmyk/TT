@@ -125,11 +125,21 @@ async function pull(){
   try{
     const r=await fetch(SCRIPT_URL+'?action=load',{redirect:'follow'});
     const j=await r.json();
-    if(j.data){G.accs=j.data.accs;G.sel=j.data.sel;G.nid=j.data.nid;localStorage.setItem(CACHE_KEY,JSON.stringify(j.data));setSS('ok','Synced · '+new Date().toLocaleTimeString());}
-    else setSS('ok','Ready');
+    if(j.data){
+      const keepSel=G.sel;
+      const keepPa=G.pa;
+      const keepPn=G.pn;
+      G.accs=j.data.accs;
+      G.nid=j.data.nid;
+      G.sel=G.accs.find(a=>a.id===keepSel)?keepSel:G.accs[0].id;
+      G.pa=keepPa;
+      G.pn=keepPn;
+      localStorage.setItem(CACHE_KEY,JSON.stringify(j.data));
+      setSS('ok','Synced · '+new Date().toLocaleTimeString());
+    }else setSS('ok','Ready');
   }catch(e){
     const c=localStorage.getItem(CACHE_KEY);
-    if(c){try{const p=JSON.parse(c);G.accs=p.accs;G.sel=p.sel;G.nid=p.nid;}catch(_){}}
+    if(c){try{const p=JSON.parse(c);G.accs=p.accs;G.nid=p.nid;}catch(_){}}
     setSS('err','Offline — cached data');
   }
   render();
